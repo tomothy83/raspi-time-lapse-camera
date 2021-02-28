@@ -1,0 +1,42 @@
+#!/bin/bash
+####################################
+# TAKE_PICTURE
+#
+####################################
+
+if [ "$IMAGE_RESOLUTION" = "" ]; then
+  echo "Specify IMAGE_RESOLUTION."
+  exit 1
+fi
+
+if [ "$SPOOL_DIRECTORY" = "" ]; then
+  echo "Specify SPOOL_DIRECTORY."
+  exit 1
+fi
+
+if [ ! -d "$SPOOL_DIRECTORY" ]; then
+  mkdir -p $SPOOL_DIRECTORY
+fi
+
+BACKUP_SPOOL=$SPOOL_DIRECTORY/BACKUP
+PROCESS_SPOOL=$SPOOL_DIRECTORY/PROCESS
+
+if [ ! -d "$BACKUP_SPOOL" ]; then
+  mkdir -p $BACKUP_SPOOL
+fi
+
+if [ ! -d "$PROCESS_SPOOL" ]; then
+  mkdir -p $PROCESS_SPOOL
+fi
+
+tmp=/tmp/$$
+ts=$(date +"%Y%m%d%H%M%S")
+process_file_base=image-$(date +"%Y%m%d")
+process_file_idx=$(grep "$PROCESS_SPOOL/$process_file_base" | wc -l)
+process_file=${process_file_base}-$(seq -f "%05g" $process_file_idx $process_file_idx).jpg
+
+fswebcam -r $IMAGE_RESOLUTION $tmp-image
+cp $tmp-image $BACKUP_SPOOL/image-${ts}.jpg
+cp $tmp-image $PROCESS_SPOOL/$process_file
+
+rm $tmp-*
