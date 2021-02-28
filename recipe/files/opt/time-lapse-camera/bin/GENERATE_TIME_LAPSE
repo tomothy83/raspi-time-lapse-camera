@@ -1,0 +1,44 @@
+#!/bin/bash
+####################################
+# GENERATE_TIME_LAPSE
+#
+####################################
+
+if [ "$IMAGE_RESOLUTION" = "" ]; then
+  echo "Specify IMAGE_RESOLUTION."
+  exit 1
+fi
+
+if [ "$PROCESS_SPOOL_DIRECTORY" = "" ]; then
+  echo "Specify PROCESS_SPOOL_DIRECTORY."
+  exit 1
+fi
+
+if [ ! -d "$PROCESS_SPOOL_DIRECTORY" ]; then
+  echo "PROCESS_SPOOL_DIRECTORY does not exist."
+  exit 1
+fi
+
+if [ "$1" = "" ]; then
+  dt=$(date -d "-1 day" +"%Y%m%d")
+else
+  dt=$1
+fi
+
+process_file_base=image-$dt
+
+tmp=/tmp/$$
+
+touch $tmp-lock
+
+ffmpeg -f image2                                            \
+  -framerate 30                                             \
+  -pattern_type glob                                        \
+  -i "$PROCESS_SPOOL_DIRECTORY/$process_file_base-*.jpg"    \
+  -r 30                                                     \
+  $tmp-timelapse.avi
+  # -pix_fmt yuv422p10                                        \
+
+mv $tmp-timelapse.avi $HOME/$dt.avi
+
+rm $tmp-*

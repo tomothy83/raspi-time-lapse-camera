@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer for generating time-lapse movie.
+
+[Timer]
+OnCalendar=*-*-* 00:25:05
+RandomizedDelaySec=3min
+
+[Install]
+WantedBy=timers.target

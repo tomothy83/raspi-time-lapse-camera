@@ -41,6 +41,8 @@ directory "#{appdir}/bin" do
   mode "0755"
 end
 
+# Take pictures
+
 remote_file "#{appdir}/bin/TAKE_PICTURE" do
   owner "root"
   group "root"
@@ -66,5 +68,33 @@ execute "systemctl daemon-reload" do
 end
 
 service "time-lapse-take-picture.timer" do
+  action [:start, :enable]
+end
+
+# Make mpeg
+
+package "ffmpeg"
+
+remote_file "#{appdir}/bin/GENERATE_TIME_LAPSE" do
+  owner "root"
+  group "root"
+  mode "0755"
+end
+
+template "/etc/systemd/system/generate-time-lapse.service" do
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(user: u, spool_dir: "#{appdir}/SPOOL/PROCESS", image_resolution: node[:image_resolution])
+  notifies :run, "execute[systemctl daemon-reload]"
+end
+
+remote_file "/etc/systemd/system/generate-time-lapse.timer" do
+  owner "root"
+  group "root"
+  notifies :run, "execute[systemctl daemon-reload]"
+end
+
+service "generate-time-lapse.timer" do
   action [:start, :enable]
 end

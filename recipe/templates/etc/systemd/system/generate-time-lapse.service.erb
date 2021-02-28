@@ -1,0 +1,12 @@
+[Unit]
+Description=Generate time-lapse movie.
+RefuseManualStart=no
+RefuseManualStop=yes
+
+[Service]
+Type=oneshot
+User=<%= @user %>
+Environment="PROCESS_SPOOL_DIRECTORY=<%= @spool_dir %>"
+Environment="IMAGE_RESOLUTION=<%= @image_resolution %>"
+WorkingDirectory=/opt/time-lapse-camera/bin
+ExecStart=/opt/time-lapse-camera/bin/GENERATE_TIME_LAPSE
