@@ -32,7 +32,7 @@ fi
 tmp=/tmp/$$
 ts=$(date +"%Y%m%d%H%M%S")
 process_file_base=image-$(date +"%Y%m%d")
-process_file_idx=$(grep "$PROCESS_SPOOL/$process_file_base" | wc -l)
+process_file_idx=$(ls "$PROCESS_SPOOL" | grep "$process_file_base" | wc -l)
 process_file=${process_file_base}-$(seq -f "%05g" $process_file_idx $process_file_idx).jpg
 
 fswebcam -r $IMAGE_RESOLUTION $tmp-image
