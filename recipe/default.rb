@@ -1,11 +1,21 @@
 node.validate! do
   {
+    timezone: string,
     image_resolution: string,
   }
 end
 
 appdir = "/opt/time-lapse-camera"
 u = "timelapsecam"
+
+execute "timedatectl set-timezone #{node[:timezone]}" do
+  not_if "timedatectl | grep #{node[:timezone]}"
+end
+
+package "chrony"
+service "chrony" do
+  action [:start, :enable]
+end
 
 directory appdir do
   owner u
