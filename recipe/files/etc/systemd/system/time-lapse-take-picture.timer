@@ -3,7 +3,6 @@ Description=Timer for taking picture for time-lapse movie.
 
 [Timer]
 OnCalendar=*-*-* *:*:05
-RandomizedDelaySec=10sec
 
 [Install]
 WantedBy=timers.target
