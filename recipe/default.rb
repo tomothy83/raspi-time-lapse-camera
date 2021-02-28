@@ -55,6 +55,16 @@ template "/etc/systemd/system/time-lapse-take-picture.service" do
   notifies :run, "execute[systemctl daemon-reload]"
 end
 
+remote_file "/etc/systemd/system/time-lapse-take-picture.timer" do
+  owner "root"
+  group "root"
+  notifies :run, "execute[systemctl daemon-reload]"
+end
+
 execute "systemctl daemon-reload" do
   action :nothing
+end
+
+service "time-lapse-take-picture.timer" do
+  action [:start, :enable]
 end
