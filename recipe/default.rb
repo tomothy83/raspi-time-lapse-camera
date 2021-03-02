@@ -128,3 +128,36 @@ end
 service "generate-time-lapse.timer" do
   action [:start, :enable]
 end
+
+# Upload image
+
+remote_file "#{appdir}/bin/UPLOAD_IMAGE" do
+  owner "root"
+  group "root"
+  mode "0755"
+end
+
+template "/etc/systemd/system/upload-image.service" do
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(
+    user: u,
+    backup_dir: "#{appdir}/SPOOL/BACKUP",
+    aws_key_id: node[:aws_credentials][:access_key_id],
+    aws_secret: node[:aws_credentials][:access_secret],
+    aws_region: node[:aws_credentials][:region],
+    s3_bucket: node[:s3_bucket]
+  )
+  notifies :run, "execute[systemctl daemon-reload]"
+end
+
+remote_file "/etc/systemd/system/upload-image.timer" do
+  owner "root"
+  group "root"
+  notifies :run, "execute[systemctl daemon-reload]"
+end
+
+service "upload-image.timer" do
+  action [:start, :enable]
+end

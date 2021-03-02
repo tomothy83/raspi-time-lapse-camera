@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer for uploading image.
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=60min
+
+[Install]
+WantedBy=timers.target

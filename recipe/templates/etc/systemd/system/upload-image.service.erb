@@ -1,0 +1,15 @@
+[Unit]
+Description=Upload image to S3.
+RefuseManualStart=no
+RefuseManualStop=yes
+
+[Service]
+Type=oneshot
+User=<%= @user %>
+Environment="BACKUP_DIRECTORY=<%= @backup_dir %>"
+Environment="AWS_ACCESS_KEY_ID=<%= @aws_key_id %>"
+Environment="AWS_SECRET_ACCESS_KEY=<%= @aws_secret %>"
+Environment="AWS_DEFAULT_REGION=<%= @aws_region %>"
+Environment="S3_BUCKET=<%= @s3_bucket %>"
+WorkingDirectory=/opt/time-lapse-camera/bin
+ExecStart=/opt/time-lapse-camera/bin/UPLOAD_IMAGE
