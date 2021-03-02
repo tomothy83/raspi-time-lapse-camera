@@ -1,1 +1,7 @@
-image_resolution: "640x360"
+timezone: "Asia/Tokyo"
+image_resolution: "150x100"
+aws_credentials:
+  access_key_id: "AWS_KEY"
+  access_secret: "AWS_SECRET"
+  region: "region"
+s3_bucket: "s3 bucket name"

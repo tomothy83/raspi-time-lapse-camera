@@ -1,16 +1,31 @@
-#!/bin/bash
+#!/bin/bash -x
 ####################################
 # GENERATE_TIME_LAPSE
 #
 ####################################
 
-if [ "$IMAGE_RESOLUTION" = "" ]; then
-  echo "Specify IMAGE_RESOLUTION."
+if [ "$PROCESS_SPOOL_DIRECTORY" = "" ]; then
+  echo "Specify PROCESS_SPOOL_DIRECTORY."
   exit 1
 fi
 
-if [ "$PROCESS_SPOOL_DIRECTORY" = "" ]; then
-  echo "Specify PROCESS_SPOOL_DIRECTORY."
+if [ "$S3_BUCKET" = "" ]; then
+  echo "Specify S3_BUCKET."
+  exit 1
+fi
+
+if [ "$AWS_ACCESS_KEY_ID" = "" ]; then
+  echo "Specify AWS_ACCESS_KEY_ID."
+  exit 1
+fi
+
+if [ "$AWS_SECRET_ACCESS_KEY" = "" ]; then
+  echo "Specify AWS_SECRET_ACCESS_KEY."
+  exit 1
+fi
+
+if [ "$AWS_DEFAULT_REGION" = "" ]; then
+  echo "Specify AWS_DEFAULT_REGION."
   exit 1
 fi
 
@@ -37,8 +52,21 @@ ffmpeg -f image2                                            \
   -i "$PROCESS_SPOOL_DIRECTORY/$process_file_base-*.jpg"    \
   -r 30                                                     \
   $tmp-timelapse.avi
-  # -pix_fmt yuv422p10                                        \
 
-mv $tmp-timelapse.avi $HOME/$dt.avi
+if [ $? -ne 0 ]; then
+  echo "ffmpeg error"
+  rm $tmp-*
+  exit 1
+fi
+
+aws s3 cp $tmp-timelapse.avi s3://$S3_BUCKET/upload/video/$dt.avi
+
+if [ $? -ne 0 ]; then
+  echo "uploading error"
+  rm $tmp-*
+  exit 1
+fi
+
+rm $PROCESS_SPOOL_DIRECTORY/$process_file_base-*
 
 rm $tmp-*

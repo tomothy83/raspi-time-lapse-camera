@@ -2,6 +2,12 @@ node.validate! do
   {
     timezone: string,
     image_resolution: string,
+    aws_credentials: {
+      access_key_id: string,
+      access_secret: string,
+      region: string,
+    },
+    s3_bucket: string,
   }
 end
 
@@ -23,8 +29,12 @@ directory appdir do
   mode "0755"
 end
 
+# Utility
+
 package "fswebcam"
 package "v4l-utils"
+
+# User and directory
 
 user u do
   home appdir
@@ -71,6 +81,19 @@ service "time-lapse-take-picture.timer" do
   action [:start, :enable]
 end
 
+# AWS CLI
+package "unzip"
+
+execute "install aws-cli" do
+  command <<EOB
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip &&                                                                 \
+    ./aws/install &&                                                                      \
+    rm -rf ./aws awscliv2.zip
+EOB
+  not_if "which aws"
+end
+
 # Make mpeg
 
 package "ffmpeg"
@@ -85,7 +108,14 @@ template "/etc/systemd/system/generate-time-lapse.service" do
   owner "root"
   group "root"
   mode "0644"
-  variables(user: u, spool_dir: "#{appdir}/SPOOL/PROCESS", image_resolution: node[:image_resolution])
+  variables(
+    user: u,
+    spool_dir: "#{appdir}/SPOOL/PROCESS",
+    aws_key_id: node[:aws_credentials][:access_key_id],
+    aws_secret: node[:aws_credentials][:access_secret],
+    aws_region: node[:aws_credentials][:region],
+    s3_bucket: node[:s3_bucket]
+  )
   notifies :run, "execute[systemctl daemon-reload]"
 end
 
