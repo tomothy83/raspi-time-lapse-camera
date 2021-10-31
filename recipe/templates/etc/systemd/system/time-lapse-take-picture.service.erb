@@ -8,5 +8,6 @@ Type=oneshot
 User=<%= @user %>
 Environment="SPOOL_DIRECTORY=<%= @spool_dir %>"
 Environment="IMAGE_RESOLUTION=<%= @image_resolution %>"
+Environment="VIDEO_DEVICES=<%= @video_devices %>"
 WorkingDirectory=/opt/time-lapse-camera/bin
 ExecStart=/opt/time-lapse-camera/bin/TAKE_PICTURE

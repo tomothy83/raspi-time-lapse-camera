@@ -1,5 +1,7 @@
 timezone: "Asia/Tokyo"
 image_resolution: "150x100"
+video_devices:
+  - "/dev/video0"
 aws_credentials:
   access_key_id: "AWS_KEY"
   access_secret: "AWS_SECRET"

@@ -1,7 +1,12 @@
+node.reverse_merge!({
+  video_devices: ['/dev/video0'],
+})
+
 node.validate! do
   {
     timezone: string,
     image_resolution: string,
+    video_devices: array_of(string),
     aws_credentials: {
       access_key_id: string,
       access_secret: string,
@@ -63,7 +68,12 @@ template "/etc/systemd/system/time-lapse-take-picture.service" do
   owner "root"
   group "root"
   mode "0644"
-  variables(user: u, spool_dir: "#{appdir}/SPOOL", image_resolution: node[:image_resolution])
+  variables(
+    user: u,
+    spool_dir: "#{appdir}/SPOOL",
+    image_resolution: node[:image_resolution],
+    video_devices: node[:video_devices].join(':'),
+  )
   notifies :run, "execute[systemctl daemon-reload]"
 end
 
@@ -114,7 +124,8 @@ template "/etc/systemd/system/generate-time-lapse.service" do
     aws_key_id: node[:aws_credentials][:access_key_id],
     aws_secret: node[:aws_credentials][:access_secret],
     aws_region: node[:aws_credentials][:region],
-    s3_bucket: node[:s3_bucket]
+    s3_bucket: node[:s3_bucket],
+    video_devices: node[:video_devices].join(':'),
   )
   notifies :run, "execute[systemctl daemon-reload]"
 end

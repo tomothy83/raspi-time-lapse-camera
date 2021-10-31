@@ -34,39 +34,51 @@ if [ ! -d "$PROCESS_SPOOL_DIRECTORY" ]; then
   exit 1
 fi
 
+if [ "$VIDEO_DEVICES" = "" ]; then
+  echo "Specify VIDEO_DEVICES."
+  exit 1
+fi
+
 if [ "$1" = "" ]; then
   dt=$(date -d "-1 day" +"%Y%m%d")
 else
   dt=$1
 fi
 
-process_file_base=image-$dt
-
 tmp=/tmp/$$
 
 touch $tmp-lock
 
-ffmpeg -f image2                                            \
-  -framerate 30                                             \
-  -pattern_type glob                                        \
-  -i "$PROCESS_SPOOL_DIRECTORY/$process_file_base-*.jpg"    \
-  -r 30                                                     \
-  $tmp-timelapse.avi
+OIFS="$IFS"
+IFS=':'
+set -- $VIDEO_DEVICES
+IFS="$OIFS"
+while [ "$1" != "" ]
+do
+  dev="$1"
+  shift
+  dev_label=$(echo $dev | sed 's|^/||;s|/|-|g')
+  process_file_base=image-${dev_label}-$dt
+  ffmpeg -f image2                                            \
+    -framerate 30                                             \
+    -pattern_type glob                                        \
+    -i "$PROCESS_SPOOL_DIRECTORY/$process_file_base-*.jpg"    \
+    -r 30                                                     \
+    $tmp-timelapse.avi
 
-if [ $? -ne 0 ]; then
-  echo "ffmpeg error"
-  rm $tmp-*
-  exit 1
-fi
+  if [ $? -ne 0 ]; then
+    echo "ffmpeg error"
+    continue
+  fi
 
-aws s3 cp $tmp-timelapse.avi s3://$S3_BUCKET/upload/video/$dt.avi
+  aws s3 cp $tmp-timelapse.avi s3://$S3_BUCKET/upload/video/${dev_label}/$dt.avi
 
-if [ $? -ne 0 ]; then
-  echo "uploading error"
-  rm $tmp-*
-  exit 1
-fi
+  if [ $? -ne 0 ]; then
+    echo "uploading error"
+    continue
+  fi
 
-rm $PROCESS_SPOOL_DIRECTORY/$process_file_base-*
+  rm $PROCESS_SPOOL_DIRECTORY/$process_file_base-*
+done
 
 rm $tmp-*
