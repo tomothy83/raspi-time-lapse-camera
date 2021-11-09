@@ -71,7 +71,7 @@ do
     continue
   fi
 
-  aws s3 cp $tmp-timelapse.avi s3://$S3_BUCKET/upload/video/${dev_label}/$dt.avi
+  aws s3 cp $tmp-${dev_label}-timelapse.avi s3://$S3_BUCKET/upload/video/${dev_label}/$dt.avi
 
   if [ $? -ne 0 ]; then
     echo "uploading error"
