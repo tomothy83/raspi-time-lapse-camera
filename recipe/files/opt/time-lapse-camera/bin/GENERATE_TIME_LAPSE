@@ -64,7 +64,7 @@ do
     -pattern_type glob                                        \
     -i "$PROCESS_SPOOL_DIRECTORY/$process_file_base-*.jpg"    \
     -r 30                                                     \
-    $tmp-timelapse.avi
+    $tmp-${dev_label}-timelapse.avi
 
   if [ $? -ne 0 ]; then
     echo "ffmpeg error"
