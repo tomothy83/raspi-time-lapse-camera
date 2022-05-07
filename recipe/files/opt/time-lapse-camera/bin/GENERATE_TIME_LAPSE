@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 ####################################
 # GENERATE_TIME_LAPSE
 #
@@ -6,26 +6,6 @@
 
 if [ "$PROCESS_SPOOL_DIRECTORY" = "" ]; then
   echo "Specify PROCESS_SPOOL_DIRECTORY."
-  exit 1
-fi
-
-if [ "$S3_BUCKET" = "" ]; then
-  echo "Specify S3_BUCKET."
-  exit 1
-fi
-
-if [ "$AWS_ACCESS_KEY_ID" = "" ]; then
-  echo "Specify AWS_ACCESS_KEY_ID."
-  exit 1
-fi
-
-if [ "$AWS_SECRET_ACCESS_KEY" = "" ]; then
-  echo "Specify AWS_SECRET_ACCESS_KEY."
-  exit 1
-fi
-
-if [ "$AWS_DEFAULT_REGION" = "" ]; then
-  echo "Specify AWS_DEFAULT_REGION."
   exit 1
 fi
 
@@ -72,8 +52,6 @@ do
     echo "ffmpeg error"
     continue
   fi
-
-  aws s3 cp $tmp-${dev_label}-timelapse.avi s3://$S3_BUCKET/upload/video/${dev_label}/$dt.avi
 
   if [ $? -ne 0 ]; then
     echo "uploading error"
