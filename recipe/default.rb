@@ -7,14 +7,14 @@ node.validate! do
     timezone: string,
     image_resolution: string,
     video_devices: array_of(string),
-    spool_dir: optional(string),
+    img_dir: optional(string),
   }
 end
 
 appdir = "/opt/time-lapse-camera"
 u = "timelapsecam"
 
-spool_dir = node[:spool_dir] != nil ? node[:spool_dir] : "#{appdir}/SPOOL"
+img_dir = node[:img_dir] != nil ? node[:img_dir] : "#{appdir}/IMAGES"
 
 execute "timedatectl set-timezone #{node[:timezone]}" do
   not_if "timedatectl | grep #{node[:timezone]}"
@@ -67,7 +67,7 @@ template "/etc/systemd/system/time-lapse-take-picture.service" do
   mode "0644"
   variables(
     user: u,
-    spool_dir: spool_dir,
+    img_dir: img_dir,
     image_resolution: node[:image_resolution],
     video_devices: node[:video_devices].join(':'),
   )
@@ -104,7 +104,6 @@ template "/etc/systemd/system/generate-time-lapse.service" do
   mode "0644"
   variables(
     user: u,
-    spool_dir: "#{spool_dir}/PROCESS",
     video_devices: node[:video_devices].join(':'),
   )
   notifies :run, "execute[systemctl daemon-reload]"

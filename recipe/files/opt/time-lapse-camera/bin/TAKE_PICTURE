@@ -9,8 +9,8 @@ if [ "$IMAGE_RESOLUTION" = "" ]; then
   exit 1
 fi
 
-if [ "$SPOOL_DIRECTORY" = "" ]; then
-  echo "Specify SPOOL_DIRECTORY."
+if [ "$IMAGE_DIRECTORY" = "" ]; then
+  echo "Specify IMAGE_DIRECTORY."
   exit 1
 fi
 
@@ -19,26 +19,14 @@ if [ "$VIDEO_DEVICES" = "" ]; then
   exit 1
 fi
 
-if [ ! -d "$SPOOL_DIRECTORY" ]; then
-  mkdir -p $SPOOL_DIRECTORY
-fi
-
-BACKUP_SPOOL=$SPOOL_DIRECTORY/BACKUP
-PROCESS_SPOOL=$SPOOL_DIRECTORY/PROCESS
-
-if [ ! -d "$BACKUP_SPOOL" ]; then
-  mkdir -p $BACKUP_SPOOL
-fi
-
-if [ ! -d "$PROCESS_SPOOL" ]; then
-  mkdir -p $PROCESS_SPOOL
+if [ ! -d "$IMAGE_DIRECTORY" ]; then
+  mkdir -p $IMAGE_DIRECTORY
 fi
 
 tmp=/tmp/$$
 
 touch $tmp-lock
 
-ts=$(date +"%Y%m%d%H%M%S")
 
 OIFS="$IFS"
 IFS=':'
@@ -52,13 +40,12 @@ do
     continue
   fi
   dev_label=$(echo $dev | sed 's|^/||;s|/|-|g')
-  process_file_base=image-${dev_label}-$(date +"%Y%m%d")
-  process_file_idx=$(ls "$PROCESS_SPOOL" | grep "$process_file_base" | wc -l)
-  process_file=${process_file_base}-$(seq -f "%05g" $process_file_idx $process_file_idx).jpg
-
+  if [ ! -d "$IMAGE_DIRECTORY/$dev_label" ]; then
+    mkdir -p "$IMAGE_DIRECTORY/$dev_label"
+  fi
+  ts=$(date +"%Y%m%d%H%M%S")
   fswebcam -d $dev -r $IMAGE_RESOLUTION $tmp-image
-  cp $tmp-image $BACKUP_SPOOL/image-${dev_label}-${ts}.jpg
-  cp $tmp-image $PROCESS_SPOOL/$process_file
+  cp $tmp-image $IMAGE_DIRECTORY/${dev_label}/img-${ts}.jpg
 done
 
 rm $tmp-*
